@@ -1,0 +1,62 @@
+package rules
+
+import org.system_regulowy.Order
+import org.system_regulowy.Pizza
+
+rule "3 Pizzas - Cheapest Free"
+    salience 20
+    when
+        $order : Order()
+
+        $cheapest : Pizza(usedInPromotion == false)
+        not Pizza(usedInPromotion == false, price < $cheapest.price)
+
+        $priciest1: Pizza(usedInPromotion == false, this != $cheapest)
+        not Pizza(usedInPromotion == false, this != $cheapest, price > $priciest1.price)
+
+        $priciest2: Pizza(usedInPromotion == false, this != $cheapest, this != $priciest1)
+        not Pizza(usedInPromotion == false, this != $cheapest, this != $priciest1, price > $priciest2.price)
+    then
+        System.out.println("---[ Aktywacja reguły '3 za 2' ]---");
+        System.out.println("-> Znaleziono grupę: " + $cheapest.getName() + ", " + $priciest1.getName() + ", " + $priciest2.getName());
+        System.out.println("-> Zastosowano zniżkę: -" + $cheapest.getPrice() + " zł (pizza " + $cheapest.getName() + " gratis).");
+        System.out.println("-> Przyznano darmowy sos do tego zestawu.");
+
+        $order.setTotal($order.getTotal() - $cheapest.getPrice());
+        $order.addNote("Promocja '3 za 2': Pizza " + $cheapest.getName() + " gratis!");
+        $order.addNote("Sos gratis!");
+
+        $cheapest.setUsedInPromotion(true);
+        $priciest1.setUsedInPromotion(true);
+        $priciest2.setUsedInPromotion(true);
+
+        update($order);
+        update($cheapest);
+        update($priciest1);
+        update($priciest2);
+end
+
+
+rule "2 Pizzas - 10 PLN Off"
+    salience 10
+    when
+        $order : Order()
+        $p1 : Pizza(usedInPromotion == false)
+        $p2 : Pizza(usedInPromotion == false, this != $p1)
+    then
+        System.out.println("---[ Aktywacja reguły '2 Pizze' ]---");
+        System.out.println("-> Znaleziono parę: " + $p1.getName() + " i " + $p2.getName());
+        System.out.println("-> Zastosowano zniżkę: -10.00 zł.");
+        System.out.println("-> Przyznano darmowy sos do tej pary.");
+
+        $order.setTotal($order.getTotal() - 10.0);
+        $order.addNote("Promocja '2 pizze': Rabat 10 zł");
+        $order.addNote("Sos gratis!");
+
+        $p1.setUsedInPromotion(true);
+        $p2.setUsedInPromotion(true);
+
+        update($order);
+        update($p1);
+        update($p2);
+end
