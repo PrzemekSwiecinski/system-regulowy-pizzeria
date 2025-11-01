@@ -1,4 +1,4 @@
-# System regułowy Drools do zarządzania promocjami w pizzeri
+# System regułowy Drools do zarządzania promocjami w pizzeri / Drools rule system for managing promotions in pizzerias
 
 (PL) Aplikacja w języku Java stworzona przy użyciu Drools, czyli systemu zarządzania regułami biznesowymi (BRMS). Aplikacja używa systemu reguł do naliczania promocji w pizzerii oraz ich różnych kombinacji. 
 
